@@ -19,6 +19,13 @@ class Queen():
         state[np.isnan(state)] = 0
         return state
 
+    def board_value(self, state):
+        board = np.nonzero(state.T)[1]
+        value = []
+        for i in range(len(board)):
+            value.append(state[board[i], i] ** 2)
+        return value
+
     def heuristic_1(self, state):
         """
         H1: The lightest Queen across all pairs of Queens attacking each other.
@@ -93,14 +100,45 @@ class Queen():
 
         return near_states
 
+    def near_state_position(self, state):
+        """
+        input: state
+        output: a list of all possible neighbours’ position
+        """
+        board = np.nonzero(state.T)[1]
+        near_states_positions = []
+
+        for col in range(len(board)):
+            for row in range(len(board)):
+                if row != board[col]:
+                    neighbour_position = list(board)
+                    neighbour_position[col] = row  # Switch column to empty
+                    near_states_positions.append(list(neighbour_position))
+
+        return near_states_positions
+
+    def cost(self, state1, state2):
+        """
+        input: two states
+        output: cost of take this step
+        """
+        board1 = np.nonzero(state1.T)[1]
+        board2 = np.nonzero(state2.T)[1]
+        return np.dot(abs(board1 - board2), self.board_value(state1))
+
 
 if __name__ == "__main__":
     q = Queen()
     state = q.input_board('heavy queens board.csv')
     h1 = q.heuristic_1(state)
     h2 = q.heuristic_2(state)
+    value = q.board_value(state)
     near_states = q.near_state(state)
+    near_states_positions = q.near_state_position(state)
     print(state)
     print(h1)
     print(h2)
+    print(value)
     print(near_states[0])
+    print(near_states_positions[0])
+    print(q.cost(state,near_states[0]))
