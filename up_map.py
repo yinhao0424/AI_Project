@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import copy
 
 
 class Map():
@@ -16,6 +17,10 @@ class Map():
         self.industrial = 0
         self.commercial = 0
         self.residential = 0
+
+        self.real_industrial = 0
+        self.real_commercial = 0
+        self.real_residential = 0
 
         self.row = 0
         self.column = 0
@@ -69,10 +74,10 @@ class Map():
            [ 0.,  0.,  0.,  0.]])
         """
 
-        real_industrial = random.randint(0, self.industrial)
-        real_commercial = random.randint(0, self.commercial)
-        real_residential = random.randint(0, self.residential)
-        total_amount = real_industrial + real_commercial + real_residential
+        self.real_industrial = random.randint(0, self.industrial)
+        self.real_commercial = random.randint(0, self.commercial)
+        self.real_residential = random.randint(0, self.residential)
+        total_amount = self.real_industrial + self.real_commercial + self.real_residential
 
         avaliable_position = []
         initial_map = np.zeros(self.map_board.shape)
@@ -84,14 +89,14 @@ class Map():
 
         put_building = random.sample(avaliable_position, total_amount)
 
-        for i in range(real_industrial):
+        for i in range(self.real_industrial):
             initial_map[put_building[i][0], put_building[i][1]] = 12
-        for i in range(real_commercial):
-            initial_map[put_building[i + real_industrial][0], put_building[i + real_industrial][1]] = 13
-        for i in range(real_residential):
+        for i in range(self.real_commercial):
+            initial_map[put_building[i + self.real_industrial][0], put_building[i + self.real_industrial][1]] = 13
+        for i in range(self.real_residential):
             initial_map[
-                put_building[i + real_industrial + real_commercial][0], put_building[i + real_industrial + real_commercial][
-                    1]] = 14
+                put_building[i + self.real_industrial + self.real_commercial][0],
+                put_building[i + self.real_industrial + self.real_commercial][1]] = 14
 
         return initial_map
 
@@ -124,8 +129,8 @@ class Map():
         """
         score = 0
 
-        toxic_positions = self.toxic_positions
-        scenic_positions = self.scenic_positions
+        toxic_positions = copy.deepcopy(self.toxic_positions)
+        scenic_positions = copy.deepcopy(self.scenic_positions)
 
         industrial_positions = np.asarray(np.where(initial_map == 12)).T
         commercial_positions = np.asarray(np.where(initial_map == 13)).T
@@ -134,21 +139,21 @@ class Map():
         # build cost
         for i in industrial_positions:
             if self.map_board[i[0], i[1]] == 11:
-                score += 1
+                score -= 1
                 scenic_positions.remove([i[0], i[1]])
             else:
                 score += self.map_board[i[0], i[1]] + 2
 
         for i in commercial_positions:
             if self.map_board[i[0], i[1]] == 11:
-                score += 1
+                score -= 1
                 scenic_positions.remove([i[0], i[1]])
             else:
                 score += self.map_board[i[0], i[1]] + 2
 
         for i in residential_positions:
             if self.map_board[i[0], i[1]] == 11:
-                score += 1
+                score -= 1
                 scenic_positions.remove([i[0], i[1]])
             else:
                 score += self.map_board[i[0], i[1]] + 2
@@ -207,10 +212,12 @@ class Map():
 if __name__ == '__main__':
     map = Map('urban 1.txt')
     map.get_map()
-    initial_map = map.initial_map()
+    # initial_map = map.initial_map()
     print('starting state')
     print(map.map_board)
-    print('initial urban plannign')
-    print(initial_map)
-    score = map.score(initial_map)
-    print(score)
+    print(map.scenic_positions)
+    # print('initial urban plannign')
+    # print(initial_map)
+    # score = map.score(initial_map)
+    # print(score)
+
