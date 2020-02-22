@@ -19,7 +19,10 @@ class hill_climbing(Map):
         self.current_score = self.score(self.current)
         self.max_score = self.score(self.current)
 
+        self.restart = 0
+
         self.neighbour = None
+        self.during_time = None
 
         self.T = 2
 
@@ -53,8 +56,7 @@ class hill_climbing(Map):
         x_position = np.asarray(np.where(self.map_board == 10)).T
         s_position = np.asarray(np.where(self.map_board == 11)).T
 
-        scores = []
-
+        start = timeit.default_timer()
         while self.T > 1:
             neighbours = []
             i_position = np.asarray(np.where(self.current == 12)).T
@@ -101,19 +103,30 @@ class hill_climbing(Map):
                 self.remove_zone(i)
                 neighbours.append(self.neighbour)
 
-            neighbour = max(neighbours, key=lambda state: self.score(state))
-            print(neighbour)
+            if neighbours:
+                neighbour = max(neighbours, key=lambda state: self.score(state))
+                print(neighbour)
 
-            if self.score(neighbour) > self.current_score:
-                self.current = neighbour
-                self.current_score = self.score(neighbour)
-            else:
-                neighbour = random.choice(neighbours)
-                if math.exp((self.score(neighbour) - self.current_score) / self.T) > random.uniform(0.0, 1.0):
+                if self.score(neighbour) > self.current_score:
                     self.current = neighbour
                     self.current_score = self.score(neighbour)
-                    self.T = self.T * 10 / 11
-            #                     T = T* k/(k+1)
-            print(self.current)
-        return self.current_score, self.T, self.current
+                else:
+                    neighbour = random.choice(neighbours)
+                    if math.exp((self.score(neighbour) - self.current_score) / self.T) > random.uniform(0.0, 1.0):
+                        self.current = neighbour
+                        self.current_score = self.score(neighbour)
+                        self.T = self.T * 10 / 11
+            #                         T = T* k/(k+1)
+            if not neighbours:
+                self.current = self.initial_map()
+                self.restart += 1
+                break
 
+            end = timeit.default_timer()
+            if (end - start) > 10:
+                break
+
+            print(self.current)
+            print(self.current_score)
+        self.during_time = end - start
+        return self.current_score, self.T, self.current, self.during_time, self.restart
