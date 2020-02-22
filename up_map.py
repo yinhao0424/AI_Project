@@ -59,158 +59,158 @@ class Map():
         self.column = self.map_board.shape[1]
 
 
-def initial_map(board):
-    """
-    Input: map class
-    Output: initial map
-    ex:
-    array([[ 0.,  0.,  0.,  0.],
-       [ 0., 14.,  0.,  0.],
-       [ 0.,  0.,  0.,  0.]])
-    """
+    def initial_map(self):
+        """
+        Input: map class
+        Output: initial map
+        ex:
+        array([[ 0.,  0.,  0.,  0.],
+           [ 0., 14.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.]])
+        """
 
-    real_industrial = random.randint(0, board.industrial)
-    real_commercial = random.randint(0, board.commercial)
-    real_residential = random.randint(0, board.residential)
-    total_amount = real_industrial + real_commercial + real_residential
+        real_industrial = random.randint(0, self.industrial)
+        real_commercial = random.randint(0, self.commercial)
+        real_residential = random.randint(0, self.residential)
+        total_amount = real_industrial + real_commercial + real_residential
 
-    avaliable_position = []
-    initial_map = np.zeros(board.map_board.shape)
+        avaliable_position = []
+        initial_map = np.zeros(self.map_board.shape)
 
-    for row in range(board.row):
-        for column in range(board.column):
-            if board.map_board[row, column] != 10:
-                avaliable_position.append([row, column])
+        for row in range(self.row):
+            for column in range(self.column):
+                if self.map_board[row, column] != 10:
+                    avaliable_position.append([row, column])
 
-    put_building = random.sample(avaliable_position, total_amount)
+        put_building = random.sample(avaliable_position, total_amount)
 
-    for i in range(real_industrial):
-        initial_map[put_building[i][0], put_building[i][1]] = 12
-    for i in range(real_commercial):
-        initial_map[put_building[i + real_industrial][0], put_building[i + real_industrial][1]] = 13
-    for i in range(real_residential):
-        initial_map[
-            put_building[i + real_industrial + real_commercial][0], put_building[i + real_industrial + real_commercial][
-                1]] = 14
+        for i in range(real_industrial):
+            initial_map[put_building[i][0], put_building[i][1]] = 12
+        for i in range(real_commercial):
+            initial_map[put_building[i + real_industrial][0], put_building[i + real_industrial][1]] = 13
+        for i in range(real_residential):
+            initial_map[
+                put_building[i + real_industrial + real_commercial][0], put_building[i + real_industrial + real_commercial][
+                    1]] = 14
 
-    return initial_map
-
-
-def manhattandistance(coor1, coor2):
-    """
-    input:
-    coor1: position of point1
-    coor2: position of point2
-    output:
-    manhattandistance
-    """
-
-    return abs(coor1[0] - coor2[0]) + abs(coor1[1] - coor2[1])
+        return initial_map
 
 
-def score(map_board, initial_map):
-    """
-    input:
-    map_start: Map class with original board
-    ex:  array([[10,  1,  2,  4],
-               [ 3,  4, 11,  3],
-               [ 6,  0,  2,  3]])
-    map: new urban design
-    ex:  array([[ 0.,  0.,  0.,  0.],
-               [ 0.,  0.,  0.,  0.],
-               [ 0., 14.,  0.,  0.]])
+    def manhattandistance(self,coor1, coor2):
+        """
+        input:
+        coor1: position of point1
+        coor2: position of point2
+        output:
+        manhattandistance
+        """
 
-    output: score of new urban design map
-    """
-    score = 0
+        return abs(coor1[0] - coor2[0]) + abs(coor1[1] - coor2[1])
 
-    toxic_positions = map_board.toxic_positions
-    scenic_positions = map_board.scenic_positions
 
-    industrial_positions = np.asarray(np.where(initial_map == 12)).T
-    commercial_positions = np.asarray(np.where(initial_map == 13)).T
-    residential_positions = np.asarray(np.where(initial_map == 14)).T
+    def score(self, initial_map):
+        """
+        input:
+        map_start: Map class with original board
+        ex:  array([[10,  1,  2,  4],
+                   [ 3,  4, 11,  3],
+                   [ 6,  0,  2,  3]])
+        map: new urban design
+        ex:  array([[ 0.,  0.,  0.,  0.],
+                   [ 0.,  0.,  0.,  0.],
+                   [ 0., 14.,  0.,  0.]])
 
-    # build cost
-    for i in industrial_positions:
-        if map_board.map_board[i[0], i[1]] == 11:
-            score += 1
-            scenic_positions.remove([i[0], i[1]])
-        else:
-            score += map_board.map_board[i[0], i[1]] + 2
+        output: score of new urban design map
+        """
+        score = 0
 
-    for i in commercial_positions:
-        if map_board.map_board[i[0], i[1]] == 11:
-            score += 1
-            scenic_positions.remove([i[0], i[1]])
-        else:
-            score += map_board.map_board[i[0], i[1]] + 2
+        toxic_positions = self.toxic_positions
+        scenic_positions = self.scenic_positions
 
-    for i in residential_positions:
-        if map_board.map_board[i[0], i[1]] == 11:
-            score += 1
-            scenic_positions.remove([i[0], i[1]])
-        else:
-            score += map_board.map_board[i[0], i[1]] + 2
+        industrial_positions = np.asarray(np.where(initial_map == 12)).T
+        commercial_positions = np.asarray(np.where(initial_map == 13)).T
+        residential_positions = np.asarray(np.where(initial_map == 14)).T
 
-    # compute benefits from each other
-    # Industrial tiles benefit from being near other industry.
-    if len(industrial_positions) > 1:
-        for i in range(0, len(industrial_positions) - 1):
-            for j in range(i + 1, len(industrial_positions)):
-                if manhattandistance(industrial_positions[i], industrial_positions[j]) <= 2:
-                    score += 2
+        # build cost
+        for i in industrial_positions:
+            if self.map_board[i[0], i[1]] == 11:
+                score += 1
+                scenic_positions.remove([i[0], i[1]])
+            else:
+                score += self.map_board[i[0], i[1]] + 2
 
-    # Commercial sites benefit from being near residential tiles.
-    for i in commercial_positions:
-        for j in residential_positions:
-            if manhattandistance(i, j) <= 3:
-                score += 4
-    # residential sites benefit from being near Commercial tiles.
-    for i in residential_positions:
-        for j in commercial_positions:
-            if manhattandistance(i, j) <= 3:
-                score += 4
+        for i in commercial_positions:
+            if self.map_board[i[0], i[1]] == 11:
+                score += 1
+                scenic_positions.remove([i[0], i[1]])
+            else:
+                score += self.map_board[i[0], i[1]] + 2
 
-    # Comercial with Comercial
-    if len(commercial_positions) > 1:
-        for i in range(0, len(commercial_positions) - 1):
-            for j in range(i + 1, len(commercial_positions)):
-                if manhattandistance(commercial_positions[i], commercial_positions[j]) <= 2:
-                    score -= 4
-    # Residential sites do not like being near industrial sites.
-    for i in commercial_positions:
-        for j in industrial_positions:
-            if manhattandistance(i, j) <= 3:
-                score -= 5
+        for i in residential_positions:
+            if self.map_board[i[0], i[1]] == 11:
+                score += 1
+                scenic_positions.remove([i[0], i[1]])
+            else:
+                score += self.map_board[i[0], i[1]] + 2
 
-    # penalty zones close to toxic waste site
-    for toxic in toxic_positions:
-        for industrial in industrial_positions:
-            if manhattandistance(toxic, industrial) <= 2:
-                score -= 10
-        for commercial in commercial_positions:
-            if manhattandistance(toxic, commercial) <= 2:
-                score -= 20
-        for residential in residential_positions:
-            if manhattandistance(toxic, residential) <= 2:
-                score -= 20
+        # compute benefits from each other
+        # Industrial tiles benefit from being near other industry.
+        if len(industrial_positions) > 1:
+            for i in range(0, len(industrial_positions) - 1):
+                for j in range(i + 1, len(industrial_positions)):
+                    if self.manhattandistance(industrial_positions[i], industrial_positions[j]) <= 2:
+                        score += 2
 
-                # prize zones close to scenic view
-    for scenic in scenic_positions:
-        for residential in residential_positions:
-            if manhattandistance(scenic, residential) <= 2:
-                score += 10
+        # Commercial sites benefit from being near residential tiles.
+        for i in commercial_positions:
+            for j in residential_positions:
+                if self.manhattandistance(i, j) <= 3:
+                    score += 4
+        # residential sites benefit from being near Commercial tiles.
+        for i in residential_positions:
+            for j in commercial_positions:
+                if self.manhattandistance(i, j) <= 3:
+                    score += 4
 
-    return score
+        # Comercial with Comercial
+        if len(commercial_positions) > 1:
+            for i in range(0, len(commercial_positions) - 1):
+                for j in range(i + 1, len(commercial_positions)):
+                    if self.manhattandistance(commercial_positions[i], commercial_positions[j]) <= 2:
+                        score -= 4
+        # Residential sites do not like being near industrial sites.
+        for i in commercial_positions:
+            for j in industrial_positions:
+                if self.manhattandistance(i, j) <= 3:
+                    score -= 5
+
+        # penalty zones close to toxic waste site
+        for toxic in toxic_positions:
+            for industrial in industrial_positions:
+                if self.manhattandistance(toxic, industrial) <= 2:
+                    score -= 10
+            for commercial in commercial_positions:
+                if self.manhattandistance(toxic, commercial) <= 2:
+                    score -= 20
+            for residential in residential_positions:
+                if self.manhattandistance(toxic, residential) <= 2:
+                    score -= 20
+
+                    # prize zones close to scenic view
+        for scenic in scenic_positions:
+            for residential in residential_positions:
+                if self.manhattandistance(scenic, residential) <= 2:
+                    score += 10
+
+        return score
 
 if __name__ == '__main__':
     map = Map('urban 1.txt')
     map.get_map()
-    initial_map = initial_map(map)
+    initial_map = map.initial_map()
     print('starting state')
     print(map.map_board)
     print('initial urban plannign')
     print(initial_map)
-    score = score(map,initial_map)
+    score = map.score(initial_map)
     print(score)
