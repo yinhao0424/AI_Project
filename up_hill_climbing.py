@@ -53,8 +53,6 @@ class hill_climbing(Map):
         self.neighbour[position[0], position[1]] = 0
 
     def climb(self):
-        x_position = np.asarray(np.where(self.map_board == 10)).T
-        s_position = np.asarray(np.where(self.map_board == 11)).T
 
         start = timeit.default_timer()
         while self.T > 1:
@@ -105,7 +103,7 @@ class hill_climbing(Map):
 
             if neighbours:
                 neighbour = max(neighbours, key=lambda state: self.score(state))
-                print(neighbour)
+
 
                 if self.score(neighbour) > self.current_score:
                     self.current = neighbour
@@ -126,7 +124,14 @@ class hill_climbing(Map):
             if (end - start) > 10:
                 break
 
-            print(self.current)
-            print(self.current_score)
         self.during_time = end - start
         return self.current_score, self.T, self.current, self.during_time, self.restart
+
+if __name__ == '__main__':
+    hc = hill_climbing('urban 1.txt')
+    current_score,T,current,during_time,restart = hc.climb()
+    print(current_score)
+    print(T)
+    print(current)
+    print(during_time)
+    print(hc.map_board)
