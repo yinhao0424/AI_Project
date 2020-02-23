@@ -142,21 +142,22 @@ class Map():
                 score -= 1
                 scenic_positions.remove([i[0], i[1]])
             else:
-                score += self.map_board[i[0], i[1]] + 2
+                score += -self.map_board[i[0], i[1]] - 2
+
 
         for i in commercial_positions:
             if self.map_board[i[0], i[1]] == 11:
                 score -= 1
                 scenic_positions.remove([i[0], i[1]])
             else:
-                score += self.map_board[i[0], i[1]] + 2
+                score += -self.map_board[i[0], i[1]] - 2
 
         for i in residential_positions:
             if self.map_board[i[0], i[1]] == 11:
                 score -= 1
                 scenic_positions.remove([i[0], i[1]])
             else:
-                score += self.map_board[i[0], i[1]] + 2
+                score += -self.map_board[i[0], i[1]] - 2
 
         # compute benefits from each other
         # Industrial tiles benefit from being near other industry.
@@ -171,6 +172,7 @@ class Map():
             for j in residential_positions:
                 if self.manhattandistance(i, j) <= 3:
                     score += 4
+
         # residential sites benefit from being near Commercial tiles.
         for i in residential_positions:
             for j in commercial_positions:
@@ -183,6 +185,7 @@ class Map():
                 for j in range(i + 1, len(commercial_positions)):
                     if self.manhattandistance(commercial_positions[i], commercial_positions[j]) <= 2:
                         score -= 4
+
         # Residential sites do not like being near industrial sites.
         for i in commercial_positions:
             for j in industrial_positions:
@@ -212,12 +215,11 @@ class Map():
 if __name__ == '__main__':
     map = Map('urban 1.txt')
     map.get_map()
-    # initial_map = map.initial_map()
+    initial_map = map.initial_map()
     print('starting state')
     print(map.map_board)
-    print(map.scenic_positions)
     # print('initial urban plannign')
-    # print(initial_map)
-    # score = map.score(initial_map)
-    # print(score)
+    print(initial_map)
+    score = map.score(initial_map)
+    print(score)
 
