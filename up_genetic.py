@@ -2,6 +2,25 @@ from up_map import Map
 import random
 import numpy as np
 import copy
+import timeit
+
+"""
+-Start with k randomly generated states (population) 
+
+-Do until “done”
+    Select k2<<k most fit states to be preserved (elitism)
+    Remove k3<k weakest states from population (culling)
+    Repeat 
+        Select two states semi-randomly
+            Weight towards states with better fitness
+            Think of fitness as opposite of heuristic function
+        Combine two states to generates two successors
+        Randomly change some bits in the states (mutation)
+
+    Until population is full
+
+"""
+
 
 
 class genetic(Map):
@@ -14,9 +33,13 @@ class genetic(Map):
         Map.__init__(self, filename)
         self.get_map()
 
-        self.size = 8
-        self.elitism_size = 1
-        self.culling_size = 1
+        self.during_time = 0
+        self.time = 0
+        self.max_score = None
+
+        self.size = 150
+        self.elitism_size = 5
+        self.culling_size = 5
 
         self.population = []
         self.sort_population = []
@@ -25,6 +48,11 @@ class genetic(Map):
         self.children = []
 
         self.max_score = None
+        self.best_state = None
+        self.current_time = None
+
+        self.results = []
+        self.result = None
 
     def initial_population(self):
         for i in range(self.size):
@@ -49,7 +77,7 @@ class genetic(Map):
             self.elitism.append(population.pop())
 
         for i in range(self.culling_size):
-            self.elitism.append(self.sort_population.pop(0))
+            self.culling.append(self.sort_population.pop(0))
 
     def check_children(self, state):
         """
@@ -70,10 +98,11 @@ class genetic(Map):
 
     def crossover(self):
         """
+        need: self.sort_population
         randomly choose two parents, and generate self.chilren
         """
         cutpoint = int(self.column / 2)
-        while True:
+        while len(self.children) < self.size - self.elitism_size:
             num1 = np.random.randint(0, len(self.sort_population))
             num2 = np.random.randint(0, len(self.sort_population))
             if num1 != num2:
@@ -84,7 +113,6 @@ class genetic(Map):
                 child2 = np.concatenate((parent2[:, cutpoint:], parent1[:, :cutpoint]), axis=1)
                 if self.check_children(child1):
                     self.children.append(child1)
-                    children_size += 1
 
                 if len(self.children) == self.size - self.elitism_size:
                     break
@@ -112,11 +140,45 @@ class genetic(Map):
                 child[row1, column1] = child[row2, column2]
                 child[row2, column2] = temp
 
-    def ga(self):
+    def genetic_algorithm(self):
         """
         run genetic algorithm
+        end state: time over 10 seconds
 
         """
         self.initial_population()
+        start = timeit.default_timer()
+        i = 0
+        while True:
+            print('going through ' + str(i) + ' generation')
+            self.rank_population()
+            self.get_elitism_culling()
+            self.crossover()
+
+            self.mutation()
+            self.children.extend(self.elitism)
+
+            self.best_state = max(self.children, key=lambda child: self.score(child))
+            self.max_score = self.score(self.best_state)
+            self.current_time = timeit.default_timer() - start
+            self.results.append((self.max_score, -self.current_time, self.best_state))
+
+            self.population = self.children
+
+            end = timeit.default_timer()
+            i = i + 1
+            if (end - start) > 10:
+                break
+        #         small to large
+        self.results.sort()
+        self.result = self.results.pop()
+        self.during_time = end - start
 
 
+if __name__ == '__main__':
+    ga = genetic('urban 2.txt')
+    ga.genetic_algorithm()
+
+    print(ga.result)
+    print(ga.during_time)
+    print(ga.map_board)
