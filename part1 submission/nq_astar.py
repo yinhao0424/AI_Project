@@ -157,13 +157,5 @@ if __name__ == "__main__":
     print(astar.result)
 
 
-    # q = Queen()
-    # state, node_expanded, during_time, result = a_star(q, filename,'H1')
-    # print('start states: ')
-    # print(state)
-    # print('end state: ')
-    # print(result)
-    # print(during_time)
-    # print(node_expanded)
 
 
