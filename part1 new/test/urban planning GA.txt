@@ -1,0 +1,9 @@
+The score for best map is:  27
+The time that score was first achieved: 7.117708438999999
+The map of the city:
+[['2' '3' '3' 'X' '6']
+ ['4' 'X' '3' '2' '3']
+ ['3' '1' '1' '6' 'X']
+ ['7' '6' '5' '8' '5']
+ ['S' 'R' 'S' 'C' '1']
+ ['4' 'C' '2' '6' 'R']]
